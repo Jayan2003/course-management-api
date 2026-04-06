@@ -76,6 +76,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     Encoding.UTF8.GetBytes("THIS_IS_MY_SUPER_SECRET_KEY_123456")
                 )
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var token = context.Request.Cookies["jwt"];
+
+                if (!string.IsNullOrEmpty(token))
+                {
+                    context.Token = token;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
     });
 builder.Services.AddHangfire(config =>
     config.UseSqlServerStorage(

@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -32,12 +33,30 @@ public class AuthController : ControllerBase
 
         var token = new JwtSecurityToken(
             claims: claims,
-            expires: DateTime.Now.AddHours(1),
+            expires: DateTime.UtcNow.AddHours(1),
             signingCredentials: creds
         );
 
         var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
-        return Ok(new { token = jwt });
+        // ✅ Store token in HttpOnly Cookie (IMPORTANT CHANGE)
+        Response.Cookies.Append("jwt", jwt, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = false, // ⚠️ use false for localhost
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddHours(1)
+        });
+
+        // ❌ DO NOT return token anymore
+        return Ok(new { message = "Login successful" });
+    }
+
+    // ✅ Optional (recommended) Logout endpoint
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("jwt");
+        return Ok(new { message = "Logged out successfully" });
     }
 }
