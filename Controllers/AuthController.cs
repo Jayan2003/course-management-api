@@ -1,10 +1,12 @@
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using CourseManagementApi.Data;
 using CourseManagementApi.DTOs;
+using CourseManagementApi.Models;
 
 namespace CourseManagementApi.Controllers;
 
@@ -12,17 +14,36 @@ namespace CourseManagementApi.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
+    private readonly AppDbContext _db;
+
+    public AuthController(AppDbContext db)
+    {
+        _db = db;
+    }
+
     [HttpPost("login")]
     public IActionResult Login(LoginDto dto)
     {
-        // simple demo authentication
-        if (dto.Username != "admin" || dto.Password != "1234")
+        string role;
+
+        var dbUser = _db.Users.FirstOrDefault(u => u.Username == dto.Username && u.Password == dto.Password);
+        if (dbUser != null)
+        {
+            role = "User";
+        }
+        else if (dto.Username == "admin" && dto.Password == "1234")
+        {
+            role = "Admin";
+        }
+        else
+        {
             return Unauthorized();
+        }
 
         var claims = new[]
         {
             new Claim(ClaimTypes.Name, dto.Username),
-            new Claim(ClaimTypes.Role, "Admin")
+            new Claim(ClaimTypes.Role, role)
         };
 
         var key = new SymmetricSecurityKey(
@@ -39,24 +60,39 @@ public class AuthController : ControllerBase
 
         var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
-        // ✅ Store token in HttpOnly Cookie (IMPORTANT CHANGE)
         Response.Cookies.Append("jwt", jwt, new CookieOptions
         {
             HttpOnly = true,
-            Secure = false, // ⚠️ use false for localhost
+            Secure = false,
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddHours(1)
         });
 
-        // ❌ DO NOT return token anymore
-        return Ok(new { message = "Login successful" });
+        return Ok(new { message = "Login successful", role });
     }
 
-    // ✅ Optional (recommended) Logout endpoint
     [HttpPost("logout")]
     public IActionResult Logout()
     {
         Response.Cookies.Delete("jwt");
         return Ok(new { message = "Logged out successfully" });
+    }
+
+    [AllowAnonymous]
+    [HttpPost("register")]
+    public IActionResult Register(RegisterDto dto)
+    {
+        if (_db.Users.Any(u => u.Username == dto.Username))
+            return BadRequest(new { message = "Username already taken" });
+
+        _db.Users.Add(new User
+        {
+            Username = dto.Username,
+            Password = dto.Password,
+            Name = dto.Name
+        });
+        _db.SaveChanges();
+
+        return Ok(new { message = "Registered successfully" });
     }
 }

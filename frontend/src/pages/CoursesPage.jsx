@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import * as courseService from '../services/courseService'
 
-export default function CoursesPage() {
+export default function CoursesPage({ role }) {
   const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const isAdmin = role === 'Admin'
 
   useEffect(() => {
     courseService.getAll()
@@ -35,7 +36,7 @@ export default function CoursesPage() {
     <div>
       <div className="page-header">
         <h2>Courses</h2>
-        <Link to="/courses/new" className="btn btn-primary">+ Add Course</Link>
+        {isAdmin && <Link to="/courses/new" className="btn btn-primary">+ Add Course</Link>}
       </div>
 
       {error && (
@@ -59,7 +60,7 @@ export default function CoursesPage() {
                 <th>Title</th>
                 <th>Hours</th>
                 <th>Instructor</th>
-                <th>Actions</th>
+                {isAdmin && <th>Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -69,12 +70,14 @@ export default function CoursesPage() {
                   <td>{c.title}</td>
                   <td>{c.hours}</td>
                   <td>{c.instructorName}</td>
-                  <td>
-                    <div className="td-actions">
-                      <Link to={`/courses/${c.id}`} className="btn btn-sm btn-success">Edit</Link>
-                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(c.id)}>Delete</button>
-                    </div>
-                  </td>
+                  {isAdmin && (
+                    <td>
+                      <div className="td-actions">
+                        <Link to={`/courses/${c.id}`} className="btn btn-sm btn-success">Edit</Link>
+                        <button className="btn btn-sm btn-danger" onClick={() => handleDelete(c.id)}>Delete</button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

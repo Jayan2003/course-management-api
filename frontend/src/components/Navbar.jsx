@@ -1,13 +1,17 @@
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../services/axios'
 
-export default function Navbar({ toggleTheme, theme }) {
+export default function Navbar({ toggleTheme, theme, setIsLoggedIn, setRole }) {
   const navigate = useNavigate()
 
   const handleLogout = async () => {
     try {
       await api.post('/auth/logout')
     } finally {
+      localStorage.removeItem('loggedIn')
+      localStorage.removeItem('userRole')
+      setIsLoggedIn(false)
+      setRole('')
       navigate('/login')
     }
   }

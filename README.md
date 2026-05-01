@@ -9,8 +9,10 @@ The system demonstrates important Web Engineering concepts such as:
 
 * Entity relationships in Entity Framework Core
 * Clean service-layer architecture using Dependency Injection
-* DTO design and validation
+* DTO validation using Data Annotations
 * JWT Authentication via HttpOnly cookies and Role-based Authorization
+* User registration system with role-based UI visibility
+* Protected client-side routes with redirect for unauthenticated users
 * Optimized LINQ querying
 * Background processing using Hangfire
 * React SPA with client-side routing and theme switching
@@ -39,7 +41,7 @@ Used to authenticate users and protect API endpoints. The token is stored in an 
 
 ### 🔹 Role-Based Authorization
 
-Restricts access to endpoints based on user roles such as **Admin**.
+Restricts access to endpoints based on user roles such as **Admin**. Regular **User** accounts can view data but cannot create, edit, or delete records.
 
 ### 🔹 Swagger (OpenAPI)
 
@@ -91,7 +93,10 @@ Each instructor has exactly one profile containing additional information.
 * DTO validation using Data Annotations
 * Global exception handling middleware
 * JWT authentication stored in HttpOnly cookies
-* Role-based endpoint protection
+* User registration system with persistent user accounts in the database
+* Role-based endpoint protection (Admin vs User)
+* Role-based UI — Add/Edit/Delete buttons hidden for non-admin users
+* Protected frontend routes that redirect unauthenticated users to `/login`
 * Optimized read-only queries using `AsNoTracking()`
 * LINQ projection using `Select()`
 * Background scheduled job to clean old enrollments
@@ -101,10 +106,10 @@ Each instructor has exactly one profile containing additional information.
 
 ## 🔐 Authentication
 
-User must authenticate using:
+### Login
 
 ```
-POST /api/Auth/login
+POST /api/auth/login
 ```
 
 Example Request:
@@ -116,17 +121,68 @@ Example Request:
 }
 ```
 
-On successful login, the server sets an **HttpOnly cookie** (`jwt`) containing the token. The token is **not returned in the response body**.
+Example Response:
+
+```json
+{
+  "message": "Login successful",
+  "role": "Admin"
+}
+```
+
+On successful login, the server sets an **HttpOnly cookie** (`jwt`) containing the token and returns the user's **role** in the response body. The role is stored in `localStorage` by the frontend for UI control.
 
 All protected endpoints are authenticated automatically — the browser sends the cookie with every request. **No `Authorization` header is needed or used by the frontend.**
 
-To log out:
+### Registration
+
+New users can self-register via:
 
 ```
-POST /api/Auth/logout
+POST /api/auth/register
 ```
 
-This clears the cookie server-side.
+Example Request:
+
+```json
+{
+  "username": "john",
+  "password": "pass123",
+  "name": "John Doe"
+}
+```
+
+Registered users are stored in the `Users` table and are assigned the **"User"** role on login. The built-in `admin / 1234` account is assigned the **"Admin"** role.
+
+### Logout
+
+```
+POST /api/auth/logout
+```
+
+Clears the HttpOnly cookie server-side.
+
+---
+
+## 🛡 Role-Based Access
+
+The system has two roles:
+
+| Role  | Permissions |
+|-------|-------------|
+| **Admin** | Can view, create, edit, and delete all data. Full access to all API endpoints and frontend actions. |
+| **User**  | Can only view data. Add, Edit, and Delete buttons are hidden on the frontend. Write API endpoints return `403 Forbidden` if called directly. |
+
+**How role is determined:**
+
+* `admin / 1234` → role `"Admin"`
+* Any account registered via `/api/auth/register` → role `"User"`
+
+**How role is stored on the frontend:**
+
+* The login response body includes `"role": "Admin"` or `"role": "User"`
+* The frontend saves this value to `localStorage` as `userRole`
+* All list pages (`StudentsPage`, `CoursesPage`, `InstructorsPage`) read `role` from state and conditionally render admin-only controls
 
 ---
 
@@ -145,6 +201,16 @@ Without `AllowCredentials()` and a matching allowed origin, the browser would bl
 ---
 
 ## 📡 API Endpoint Documentation
+
+### 🔑 Auth
+
+| Method | Endpoint               | Description                        | Auth Required |
+| ------ | ---------------------- | ---------------------------------- | ------------- |
+| POST   | `/api/auth/login`      | Login and receive JWT cookie + role | ❌ Public    |
+| POST   | `/api/auth/register`   | Register a new user (role: User)   | ❌ Public     |
+| POST   | `/api/auth/logout`     | Logout and clear JWT cookie        | ❌ Public     |
+
+---
 
 ### 👨‍🎓 Students
 
@@ -211,36 +277,40 @@ Example Request:
 
 ### Frontend Routes
 
-| Route              | Page              | Description      |
-| ------------------ | ----------------- | ---------------- |
-| `/`                | HomePage          | Landing page     |
-| `/login`           | LoginPage         | Login form       |
-| `/students`        | StudentsPage      | List all students |
-| `/students/new`    | StudentFormPage   | Create student   |
-| `/students/:id`    | StudentFormPage   | Edit student     |
-| `/courses`         | CoursesPage       | List all courses |
-| `/courses/new`     | CourseFormPage    | Create course    |
-| `/courses/:id`     | CourseFormPage    | Edit course      |
-| `/instructors`     | InstructorsPage   | List all instructors |
-| `/instructors/new` | InstructorFormPage | Create instructor |
-| `/instructors/:id` | InstructorFormPage | Edit instructor  |
+| Route              | Page               | Description                        |
+| ------------------ | ------------------ | ---------------------------------- |
+| `/`                | HomePage           | Landing page (protected)           |
+| `/login`           | LoginPage          | Login form (public)                |
+| `/register`        | RegisterPage       | User registration form (public)    |
+| `/students`        | StudentsPage       | List all students (protected)      |
+| `/students/new`    | StudentFormPage    | Create student (protected)         |
+| `/students/:id`    | StudentFormPage    | Edit student (protected)           |
+| `/courses`         | CoursesPage        | List all courses (protected)       |
+| `/courses/new`     | CourseFormPage     | Create course (protected)          |
+| `/courses/:id`     | CourseFormPage     | Edit course (protected)            |
+| `/instructors`     | InstructorsPage    | List all instructors (protected)   |
+| `/instructors/new` | InstructorFormPage | Create instructor (protected)      |
+| `/instructors/:id` | InstructorFormPage | Edit instructor (protected)        |
 
 ### Authentication Flow
 
 1. User submits credentials via `POST /api/auth/login`
-2. Backend validates and sets an **HttpOnly cookie** (`jwt`)
-3. Axios is configured with `withCredentials: true` — the browser includes the cookie automatically on every subsequent request
-4. No token is stored in `localStorage` or `sessionStorage`
-5. On logout, `POST /api/auth/logout` clears the cookie server-side
+2. Backend validates, sets an **HttpOnly cookie** (`jwt`), and returns the user's **role** in the response body
+3. Frontend saves `loggedIn: true` and `userRole: <role>` to `localStorage`
+4. Axios is configured with `withCredentials: true` — the browser includes the cookie automatically on every subsequent request
+5. All routes except `/login` and `/register` are wrapped in `ProtectedRoute` — unauthenticated users are redirected to `/login`
+6. List pages read `role` from state: **Admin** sees Add/Edit/Delete controls, **User** sees read-only tables
+7. When a new user registers via `/register`, role `"User"` is saved to `localStorage` automatically
+8. On logout, `POST /api/auth/logout` clears the cookie server-side and `loggedIn` / `userRole` are removed from `localStorage`
 
 ### API Routes Used by Frontend
 
-| Purpose     | Endpoints                                      |
-| ----------- | ---------------------------------------------- |
-| Auth        | `POST /api/auth/login`, `POST /api/auth/logout` |
-| Students    | `GET/POST/PUT/DELETE /api/Students`, `GET /api/Students/{id}` |
-| Courses     | `GET/POST/PUT/DELETE /api/Courses`, `GET /api/Courses/{id}` |
-| Instructors | `GET/POST/PUT/DELETE /api/Instructors`, `GET /api/Instructors/{id}` |
+| Purpose     | Endpoints                                                              |
+| ----------- | ---------------------------------------------------------------------- |
+| Auth        | `POST /api/auth/login`, `POST /api/auth/register`, `POST /api/auth/logout` |
+| Students    | `GET/POST/PUT/DELETE /api/Students`, `GET /api/Students/{id}`          |
+| Courses     | `GET/POST/PUT/DELETE /api/Courses`, `GET /api/Courses/{id}`            |
+| Instructors | `GET/POST/PUT/DELETE /api/Instructors`, `GET /api/Instructors/{id}`    |
 
 ---
 
@@ -345,6 +415,9 @@ All screenshots are located in the `Screenshots/ApplicationScreenshots/` folder.
 | `HomePage2.png` | Home page - scrolled view |
 | `LightModeHomePage.png` | Home page - Light mode |
 | `SignInPage.png` | Login page |
+| `RegisterPage.png` | Registration form |
+| `ProtectedRoute.png` | Redirect to login when accessing a protected route unauthenticated |
+| `UserView.png` | List page with Add/Edit/Delete buttons hidden for regular User role |
 | `StudentsList.png` | Students list page |
 | `AddNewStudent.png` | Add new student form |
 | `EditStudent.png` | Edit student form (pre-filled) |
