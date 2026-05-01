@@ -186,6 +186,21 @@ The system has two roles:
 
 ---
 
+## 🔒 Security Features
+
+### Password Hashing
+
+User passwords are hashed using BCrypt before being stored in the database. The plain text password is never saved — only the BCrypt hash is stored.
+
+- Library used: BCrypt.Net-Next
+- On registration: password is hashed with `BCrypt.HashPassword()`
+- On login: password is verified with `BCrypt.Verify(plainText, hash)`
+- The admin fallback account (`admin/1234`) is separate from the database users
+
+This means even if the database is compromised, user passwords cannot be read.
+
+---
+
 ## 🌐 CORS Configuration
 
 CORS is configured in `Program.cs` to allow the React frontend to communicate with the backend.
@@ -429,5 +444,6 @@ All screenshots are located in the `Screenshots/ApplicationScreenshots/` folder.
 | `UserView_Students.png` | Students list as regular User (no buttons) |
 | `UserView_Courses.png` | Courses list as regular User (no buttons) |
 | `UserView_Instructors.png` | Instructors list as regular User (no buttons) |
+| `LoginValidation_WrongPassword.png` | Login page showing error for invalid credentials |
 
 ---
