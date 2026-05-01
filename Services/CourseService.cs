@@ -24,9 +24,30 @@ public class CourseService : ICourseService
                 Id = c.Id,
                 Title = c.Title,
                 Hours = c.Hours,
+                InstructorId = c.InstructorId,
                 InstructorName = c.Instructor.Name
             })
             .ToListAsync();
+    }
+
+    public async Task<CourseResponseDto> GetByIdAsync(int id)
+    {
+        var course = await _context.Courses
+            .AsNoTracking()
+            .Include(c => c.Instructor)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (course == null)
+            throw new Exception($"Course {id} not found");
+
+        return new CourseResponseDto
+        {
+            Id = course.Id,
+            Title = course.Title,
+            Hours = course.Hours,
+            InstructorId = course.InstructorId,
+            InstructorName = course.Instructor.Name
+        };
     }
 
     public async Task<CourseResponseDto> CreateAsync(CreateCourseDto dto)

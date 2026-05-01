@@ -22,6 +22,13 @@ public class CoursesController : ControllerBase
         return Ok(await _service.GetAllAsync());
     }
 
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var course = await _service.GetByIdAsync(id);
+        return Ok(course);
+    }
+
     [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<ActionResult<CourseResponseDto>> Create(CreateCourseDto dto)

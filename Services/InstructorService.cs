@@ -22,9 +22,24 @@ public class InstructorService : IInstructorService
             .Select(i => new InstructorResponseDto
             {
                 Id = i.Id,
-                Name = i.Name
+                Name = i.Name,
+                Email = i.Email
             })
             .ToListAsync();
+    }
+
+    public async Task<InstructorResponseDto?> GetByIdAsync(int id)
+    {
+        return await _context.Instructors
+            .AsNoTracking()
+            .Where(i => i.Id == id)
+            .Select(i => new InstructorResponseDto
+            {
+                Id = i.Id,
+                Name = i.Name,
+                Email = i.Email
+            })
+            .FirstOrDefaultAsync();
     }
 
     public async Task<InstructorResponseDto> CreateAsync(CreateInstructorDto dto)

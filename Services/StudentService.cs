@@ -23,7 +23,8 @@ public class StudentService : IStudentService
             {
                 Id = s.Id,
                 Name = s.Name,
-                Email = s.Email
+                Email = s.Email,
+                Age = s.Age
             })
             .ToListAsync();
     }
@@ -37,7 +38,8 @@ public class StudentService : IStudentService
             {
                 Id = s.Id,
                 Name = s.Name,
-                Email = s.Email
+                Email = s.Email,
+                Age = s.Age
             })
             .FirstOrDefaultAsync();
     }
