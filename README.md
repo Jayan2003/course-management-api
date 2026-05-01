@@ -414,7 +414,7 @@ All screenshots are located in the `Screenshots/ApplicationScreenshots/` folder.
 | `HomePage1.png` | Home page hero section (dark mode) |
 | `HomePage2.png` | Home page cards section (dark mode) |
 | `LightModeHomePage.png` | Home page in light mode |
-| `LoginPage_admin_.png` | Login page with admin credentials and Register link |
+| `LoginPage(admin).png` | Login page with admin credentials and Register link |
 | `RegisterPage.png` | Registration form - empty |
 | `RegisterPage_Filled.png` | Registration form - filled in |
 | `StudentsList.png` | Students list as Admin (Edit/Delete visible) |
