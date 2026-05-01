@@ -26,7 +26,9 @@ public class AuthController : ControllerBase
     {
         string role;
 
-        var dbUser = _db.Users.FirstOrDefault(u => u.Username == dto.Username && u.Password == dto.Password);
+        var dbUser = _db.Users.FirstOrDefault(u => u.Username == dto.Username);
+        if (dbUser != null && !BCrypt.Net.BCrypt.Verify(dto.Password, dbUser.Password))
+            dbUser = null;
         if (dbUser != null)
         {
             role = "User";
@@ -88,7 +90,7 @@ public class AuthController : ControllerBase
         _db.Users.Add(new User
         {
             Username = dto.Username,
-            Password = dto.Password,
+            Password = BCrypt.Net.BCrypt.HashPassword(dto.Password),
             Name = dto.Name
         });
         _db.SaveChanges();
