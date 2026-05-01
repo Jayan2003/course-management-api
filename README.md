@@ -411,26 +411,23 @@ All screenshots are located in the `Screenshots/ApplicationScreenshots/` folder.
 
 | Screenshot | Description |
 |---|---|
-| `HomePage1.png` | Home page - Dark mode |
-| `HomePage2.png` | Home page - scrolled view |
-| `LightModeHomePage.png` | Home page - Light mode |
-| `SignInPage.png` | Login page |
-| `RegisterPage.png` | Registration form |
-| `ProtectedRoute.png` | Redirect to login when accessing a protected route unauthenticated |
-| `UserView.png` | List page with Add/Edit/Delete buttons hidden for regular User role |
-| `StudentsList.png` | Students list page |
+| `HomePage1.png` | Home page hero section (dark mode) |
+| `HomePage2.png` | Home page cards section (dark mode) |
+| `LightModeHomePage.png` | Home page in light mode |
+| `LoginPage_admin_.png` | Login page with admin credentials and Register link |
+| `RegisterPage.png` | Registration form - empty |
+| `RegisterPage_Filled.png` | Registration form - filled in |
+| `StudentsList.png` | Students list as Admin (Edit/Delete visible) |
+| `CoursesList.png` | Courses list as Admin (Edit/Delete visible) |
+| `InstructorsList.png` | Instructors list as Admin (Edit/Delete visible) |
 | `AddNewStudent.png` | Add new student form |
-| `EditStudent.png` | Edit student form (pre-filled) |
-| `CoursesList.png` | Courses list page |
-| `AddNewCourse.png` | Add new course form |
-| `EditCourse.png` | Edit course form |
-| `InstructorsList.png` | Instructors list page |
+| `AddNewCourse.png` | Add new course form with instructor dropdown |
 | `AddNewInstructor.png` | Add new instructor form |
-| `EditInstructor.png` | Edit instructor form |
-| `FailedCreating_Notsignedin.png` | Error when creating without login |
-| `FailedLoading_NotSignedIn.png` | Error when loading without login |
-| `LoginValidation.png` | Login form validation - empty field error |
-| `AddCourseValidation.png` | Add course form validation - empty field error |
-| `AddInstructorValidation.png` | Add instructor form validation - empty field error |
+| `EditStudent.png` | Edit student form pre-filled |
+| `EditCourse.png` | Edit course form pre-filled |
+| `EditInstructor.png` | Edit instructor form pre-filled |
+| `UserView_Students.png` | Students list as regular User (no buttons) |
+| `UserView_Courses.png` | Courses list as regular User (no buttons) |
+| `UserView_Instructors.png` | Instructors list as regular User (no buttons) |
 
 ---
