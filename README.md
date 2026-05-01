@@ -356,5 +356,8 @@ All screenshots are located in the `Screenshots/ApplicationScreenshots/` folder.
 | `EditInstructor.png` | Edit instructor form |
 | `FailedCreating_Notsignedin.png` | Error when creating without login |
 | `FailedLoading_NotSignedIn.png` | Error when loading without login |
+| `LoginValidation.png` | Login form validation - empty field error |
+| `AddCourseValidation.png` | Add course form validation - empty field error |
+| `AddInstructorValidation.png` | Add instructor form validation - empty field error |
 
 ---
