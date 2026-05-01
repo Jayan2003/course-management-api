@@ -335,8 +335,26 @@ A recurring Hangfire job runs daily to:
 
 ---
 
-## 📸 Screenshots
+## 📸 Application Screenshots
 
-Screenshots from Swagger demonstrating working endpoints are included in the project submission.
+All screenshots are located in the `Screenshots/ApplicationScreenshots/` folder.
+
+| Screenshot | Description |
+|---|---|
+| `HomePage1.png` | Home page - Dark mode |
+| `HomePage2.png` | Home page - scrolled view |
+| `LightModeHomePage.png` | Home page - Light mode |
+| `SignInPage.png` | Login page |
+| `StudentsList.png` | Students list page |
+| `AddNewStudent.png` | Add new student form |
+| `EditStudent.png` | Edit student form (pre-filled) |
+| `CoursesList.png` | Courses list page |
+| `AddNewCourse.png` | Add new course form |
+| `EditCourse.png` | Edit course form |
+| `InstructorsList.png` | Instructors list page |
+| `AddNewInstructor.png` | Add new instructor form |
+| `EditInstructor.png` | Edit instructor form |
+| `FailedCreating_Notsignedin.png` | Error when creating without login |
+| `FailedLoading_NotSignedIn.png` | Error when loading without login |
 
 ---
